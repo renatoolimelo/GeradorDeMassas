@@ -4,13 +4,16 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.Date;
+
+import javax.swing.text.MaskFormatter;
 
 public class CPFGenerator {
 
 	private static int counter = 100000000;
 
-	public static String generateCPF(int opcaoFormatacao) {
+	public static String generateCPF(int opcaoFormatacao, String padraoFormatacao) throws ParseException {
 		counter++;
 		String baseCPF = String.format("%09d", counter);
 		String CPF = baseCPF + calculateCheckDigits(baseCPF);
@@ -19,8 +22,14 @@ public class CPFGenerator {
 			return CPF;
 		}
 
-		return String.format("%s.%s.%s-%s", CPF.substring(0, 3), CPF.substring(3, 6), CPF.substring(6, 9),
-				CPF.substring(9, 11));
+		if (opcaoFormatacao == 2) {
+			return String.format("%s.%s.%s-%s", CPF.substring(0, 3), CPF.substring(3, 6), CPF.substring(6, 9),
+					CPF.substring(9, 11));
+		}
+		
+		MaskFormatter maskFormatter = new MaskFormatter(padraoFormatacao);
+		maskFormatter.setValueContainsLiteralCharacters(false);
+		return maskFormatter.valueToString(CPF);
 
 	}
 
@@ -39,7 +48,7 @@ public class CPFGenerator {
 		return remainder < 2 ? 0 : 11 - remainder;
 	}
 
-	public CPFGenerator(int quantidadeCPF, int opcaoFormatacao) throws IOException {
+	public CPFGenerator(int quantidadeCPF, int opcaoFormatacao, String padraoFormatacao) throws IOException, ParseException {
 
 		String massaCPF = Paths.get("").toAbsolutePath().toString() + "\\massa_cpf_" + new Date().getTime() + ".csv";
 
@@ -48,7 +57,7 @@ public class CPFGenerator {
 
 		for (int i = 0; i < quantidadeCPF; i++) {
 
-			bw.write(generateCPF(opcaoFormatacao) + "\n");
+			bw.write(generateCPF(opcaoFormatacao, padraoFormatacao) + "\n");
 		}
 
 		System.out.println();

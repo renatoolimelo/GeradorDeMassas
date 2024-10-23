@@ -39,7 +39,7 @@ public class MenuGeradorDeMassa {
 				break;
 			default:
 				System.out.println();
-				System.out.println("Opção inválida");
+				System.out.println("Opção inválida!!");
 				System.out.println();
 				break;
 			}

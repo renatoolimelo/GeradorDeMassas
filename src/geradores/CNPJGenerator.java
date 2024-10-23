@@ -4,12 +4,15 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.util.Date;
+
+import javax.swing.text.MaskFormatter;
 
 public class CNPJGenerator {
 	private static int counter = 10000000;
 
-	public static String generateCNPJ(int opcaoFormatacao) {
+	public static String generateCNPJ(int opcaoFormatacao, String padraoFormatacao) throws ParseException {
 		counter++;
 		String baseCNPJ = String.format("%08d0001", counter);
 		String CNPJ = baseCNPJ + calculateCheckDigits(baseCNPJ);
@@ -18,8 +21,15 @@ public class CNPJGenerator {
 			return CNPJ;
 		}
 
-		return String.format("%s.%s.%s/%s-%s", CNPJ.substring(0, 2), CNPJ.substring(2, 5), CNPJ.substring(5, 8),
-				CNPJ.substring(8, 12), CNPJ.substring(12, 14));
+		if (opcaoFormatacao == 2) {
+			return String.format("%s.%s.%s/%s-%s", CNPJ.substring(0, 2), CNPJ.substring(2, 5), CNPJ.substring(5, 8),
+					CNPJ.substring(8, 12), CNPJ.substring(12, 14));
+		}
+		
+		MaskFormatter maskFormatter = new MaskFormatter(padraoFormatacao);
+		maskFormatter.setValueContainsLiteralCharacters(false);
+		return maskFormatter.valueToString(CNPJ);
+		
 	}
 
 	private static String calculateCheckDigits(String baseCNPJ) {
@@ -41,7 +51,7 @@ public class CNPJGenerator {
 		return remainder < 2 ? 0 : 11 - remainder;
 	}
 
-	public CNPJGenerator(int quantidadeCNPJ, int opcaoFormatacao) throws IOException {
+	public CNPJGenerator(int quantidadeCNPJ, int opcaoFormatacao, String padraoFormatacao) throws IOException, ParseException {
 
 		String massaCNPJ = Paths.get("").toAbsolutePath().toString() + "\\massa_cnpj_" + new Date().getTime() + ".csv";
 
@@ -50,7 +60,7 @@ public class CNPJGenerator {
 
 		for (int i = 0; i < quantidadeCNPJ; i++) {
 
-			bw.write(generateCNPJ(opcaoFormatacao) + "\n");
+			bw.write(generateCNPJ(opcaoFormatacao, padraoFormatacao) + "\n");
 		}
 
 		System.out.println();
